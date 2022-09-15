@@ -213,87 +213,91 @@ class NOA():
         else:
             self.cont_symm = self.obsv_mat.nullspace()      # symbolic continous symmetries
         
-        print("The observable modes are g(x) which satisfiy these partial differential equations (PDE): ")
-        dg_latex = sp.Symbol('{\partial g(\mathbf{x})}')
-        par_diff_latex = sp.symbols('\partial')
-        for ws in self.cont_symm:
-            pde_latex = 0
-            for idx_x in range(self.sys_order):
-                pde_latex += ws[idx_x]*dg_latex/(par_diff_latex*self.x[idx_x])
-            display(sp.Eq(pde_latex, 0))
-
-        all_standard_basis      = True
-        list_of_list_zero_idx   = [[]]*len(self.cont_symm)
-        list_of_set_zero_idx    = [[]]*len(self.cont_symm)
-        set_obsv_idx            = []
-
-        # Check if the continuous symmetries are all standard basis to reduce computation
-        for idx_ws, ws in enumerate(self.cont_symm):
-            zero_counter = int(0)
-            one_counter = int(0)
-            list_of_list_zero_idx[idx_ws] = []
-            
-            for i, ws_i in enumerate(ws):
-                if ws_i == 0:
-                    zero_counter += 1
-                    # Mark which elements are 0 and compare them to other cont_symms to get observable modes    
-                    list_of_list_zero_idx[idx_ws].append(i)
-                else:
-                    one_counter += 1
-            
-            list_of_set_zero_idx[idx_ws] = set(list_of_list_zero_idx[idx_ws])
-            
-            if (one_counter == 1 and zero_counter == self.sys_order-1):
-                all_standard_basis = all_standard_basis and True
-            else:
-                all_standard_basis = all_standard_basis and False
-
-        for idx_ws, _ in enumerate(list_of_set_zero_idx):
-            if idx_ws == 0:
-                set_obsv_idx = list_of_set_zero_idx[idx_ws]
-                if len(list_of_set_zero_idx) == 1:
-                    break
-            if idx_ws < len(list_of_set_zero_idx)-1:
-                set_obsv_idx = set_obsv_idx.intersection(list_of_set_zero_idx[idx_ws+1])
-        
-        # print("list_of_set_zero_idx: ", list_of_set_zero_idx)
-        # print("set_obsv_idx: ", set_obsv_idx)
-
-        if(all_standard_basis):
-            self.cont_symm_mat      = sp.Matrix([self.cont_symm])
-            self.nonobsv_subspace   = self.cont_symm_mat.T*self.x  # unobservable states
-            set_nonobsv_subspace    = set(self.nonobsv_subspace)
-            self.obsv_subspace      = set(self.x) - set_nonobsv_subspace
-            print("Observable states: ")
-            display(self.obsv_subspace)
-            print("Unobservable states: ")
-            display(set_nonobsv_subspace)   
+        if len(self.cont_symm) == 0:
+            print("All states are observable")
+            display(self.x.T)
         else:
+            print("The observable modes are g(x) which satisfiy these partial differential equations (PDE): ")
+            dg_latex = sp.Symbol('{\partial g(\mathbf{x})}')
+            par_diff_latex = sp.symbols('\partial')
             for ws in self.cont_symm:
-                g = sp.Function('g')
-                eval_str = 'g('
+                pde_latex = 0
                 for idx_x in range(self.sys_order):
-                    eval_str += 'self.x[' + str(idx_x) + ']'
-                    if idx_x == self.sys_order-1:
-                        eval_str += ')'
-                        break
+                    pde_latex += ws[idx_x]*dg_latex/(par_diff_latex*self.x[idx_x])
+                display(sp.Eq(pde_latex, 0))
+
+            all_standard_basis      = True
+            list_of_list_zero_idx   = [[]]*len(self.cont_symm)
+            list_of_set_zero_idx    = [[]]*len(self.cont_symm)
+            set_obsv_idx            = []
+
+            # Check if the continuous symmetries are all standard basis to reduce computation
+            for idx_ws, ws in enumerate(self.cont_symm):
+                zero_counter = int(0)
+                one_counter = int(0)
+                list_of_list_zero_idx[idx_ws] = []
+                
+                for i, ws_i in enumerate(ws):
+                    if ws_i == 0:
+                        zero_counter += 1
+                        # Mark which elements are 0 and compare them to other cont_symms to get observable modes    
+                        list_of_list_zero_idx[idx_ws].append(i)
                     else:
-                        eval_str += ','
-                u = eval(eval_str)
-                # ux = u.diff(x)
-                # uy = u.diff(y)
-                # genform = a*ux + b*uy + c*u
-                genform = 0
-                for idx_x in range(self.sys_order):
-                    genform += ws[idx_x]*u.diff(self.x[idx_x])
-                # TODO: Solve partial differential equation for more than 2 state variables in sympy
-                # sol = pdsolve(genform)
-                print("Observable modes: ")
-                for obsv_idx in set_obsv_idx:
-                    sol = self.x[obsv_idx]
-                    check_sol = (checkpdesol(genform, sol))
-                    if check_sol[0] == True:
-                        display(sol)
+                        one_counter += 1
+                
+                list_of_set_zero_idx[idx_ws] = set(list_of_list_zero_idx[idx_ws])
+                
+                if (one_counter == 1 and zero_counter == self.sys_order-1):
+                    all_standard_basis = all_standard_basis and True
+                else:
+                    all_standard_basis = all_standard_basis and False
+
+            for idx_ws, _ in enumerate(list_of_set_zero_idx):
+                if idx_ws == 0:
+                    set_obsv_idx = list_of_set_zero_idx[idx_ws]
+                    if len(list_of_set_zero_idx) == 1:
+                        break
+                if idx_ws < len(list_of_set_zero_idx)-1:
+                    set_obsv_idx = set_obsv_idx.intersection(list_of_set_zero_idx[idx_ws+1])
+            
+            # print("list_of_set_zero_idx: ", list_of_set_zero_idx)
+            # print("set_obsv_idx: ", set_obsv_idx)
+
+            if(all_standard_basis):
+                self.cont_symm_mat      = sp.Matrix([self.cont_symm])
+                self.nonobsv_subspace   = self.cont_symm_mat.T*self.x  # unobservable states
+                set_nonobsv_subspace    = set(self.nonobsv_subspace)
+                self.obsv_subspace      = set(self.x) - set_nonobsv_subspace
+                print("Observable states: ")
+                display(self.obsv_subspace)
+                print("Unobservable states: ")
+                display(set_nonobsv_subspace)   
+            else:
+                for ws in self.cont_symm:
+                    g = sp.Function('g')
+                    eval_str = 'g('
+                    for idx_x in range(self.sys_order):
+                        eval_str += 'self.x[' + str(idx_x) + ']'
+                        if idx_x == self.sys_order-1:
+                            eval_str += ')'
+                            break
+                        else:
+                            eval_str += ','
+                    u = eval(eval_str)
+                    # ux = u.diff(x)
+                    # uy = u.diff(y)
+                    # genform = a*ux + b*uy + c*u
+                    genform = 0
+                    for idx_x in range(self.sys_order):
+                        genform += ws[idx_x]*u.diff(self.x[idx_x])
+                    # TODO: Solve partial differential equation for more than 2 state variables in sympy
+                    # sol = pdsolve(genform)
+                    print("Observable modes: ")
+                    for obsv_idx in set_obsv_idx:
+                        sol = self.x[obsv_idx]
+                        check_sol = (checkpdesol(genform, sol))
+                        if check_sol[0] == True:
+                            display(sol)
     
     def save(self, dir):
         now = datetime.now()
