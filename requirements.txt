@@ -1,9 +1,5 @@
-sympy
-random
-json
-itertools
-IPython
+ipykernel
 datetime
-os
-pickle
+IPython
+sympy
 dill
