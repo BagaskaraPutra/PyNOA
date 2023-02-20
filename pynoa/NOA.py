@@ -31,7 +31,7 @@ class NOA():
         self.numeric_params_dict = {}           # numeric parameters dictionary
         self.obsv_mat = sp.Matrix()             # observability matrix
         self.obsv_mat_num = sp.Matrix()         # numeric observability matrix substituted with json numerical values
-        self.rank_obsv_mat = 0                  # rank of observability matrix
+        self.rank_obsv_mat = int(0)             # rank of observability matrix
 
         self.null_calc_opt = "symbolic"         # symbolic or numeric nullspace calculation of observability matrix
         self.cont_symm = []                     # continuous symmetries (nullspace of observability matrix)
@@ -68,17 +68,15 @@ class NOA():
             for idx_vector_field in idx_perm_k: 
                 current_order_vector_field_str  = current_order_vector_field_str + "f" + str(idx_vector_field)
             
-            # print("previous Lie derivative: ", previous_order_vector_field_str)
-            print("current Lie derivative: ", current_order_vector_field_str)
-            
             self.Lfh[current_order_vector_field_str]     = self.dLfh_dx[previous_order_vector_field_str] * self.f[idx_vector_field]
             self.dLfh_dx[current_order_vector_field_str] = self.Lfh[current_order_vector_field_str].jacobian(self.x)
             gradient_rows = self.dLfh_dx[current_order_vector_field_str].rows
             gradient_cols = self.dLfh_dx[current_order_vector_field_str].cols
             if(self.dLfh_dx[current_order_vector_field_str] == sp.zeros(gradient_rows,gradient_cols)):
-                print(current_order_vector_field_str, " not included in observability matrix due to null vector")
+                print("current Lie derivative: ", current_order_vector_field_str, " not appended to observability matrix due to null vector")
             else:
                 self.obsv_mat = self.obsv_mat.col_join(self.dLfh_dx[current_order_vector_field_str])
+                print("current Lie derivative: ", current_order_vector_field_str, "appended to observability matrix")
 
     def ORC(self):
         # Observability Rank Criterion (ORC) for Nonlinear Observability Analysis (NOA)
@@ -110,10 +108,23 @@ class NOA():
         if self.combn_permn_opt == "combination":
             print("Combination of Vector Fields")
             for k in range(1,self.LD_order+1):
-                # print("k =", k, "range(num_inputs+1): ", list(range(num_inputs+1)))
                 idx_all_perm = [*combinations(list(range(self.num_inputs+1)), k)]
                 print(idx_all_perm)
                 self.obsv_mat_construct(idx_all_perm, k)
+            while (self.obsv_mat.rows < self.obsv_mat.cols):
+                self.LD_order += 1
+                if (self.LD_order < self.num_inputs):
+                    print("Insufficient obv_mat rows. Appending Lie derivative order ", self.LD_order, " to obsv_mat ...")
+                    idx_all_perm = [*combinations(list(range(self.num_inputs+1)), self.LD_order)]
+                    print(idx_all_perm)
+                    self.obsv_mat_construct(idx_all_perm, self.LD_order)
+                else:
+                    break
+            print("Insufficient obsv_mat rows. Auto-construct obsv_mat using Permutation of vector fields ...")
+            self.combn_permn_opt = "permutation"
+            self.ORC()  
+                
+        
         elif self.combn_permn_opt == "drift2ndOrder":
             print("Drift 2nd Order Vector Fields")
             for k in range(1, 2+1):
@@ -124,7 +135,12 @@ class NOA():
                     for i2 in range(1, self.num_inputs+1):
                         idx_all_perm.append((0, i2))
                 print(idx_all_perm)
-                self.obsv_mat_construct(idx_all_perm, k)        
+                self.obsv_mat_construct(idx_all_perm, k)
+            if (self.obsv_mat.rows < self.obsv_mat.cols):  
+                print("Insufficient obsv_mat rows. Auto-construct obsv_mat using Permutation of vector fields ...")
+                self.combn_permn_opt = "permutation"
+                self.ORC()          
+        
         elif self.combn_permn_opt == "drift2ndOrderWuest":
             print("Drift 2nd Order Vector Fields Wuest 2019")
             for k in range(1, 2+1):
@@ -135,13 +151,24 @@ class NOA():
                     for i2 in range(1, self.num_inputs+1):
                         idx_all_perm.append((i2, 0))
                 print(idx_all_perm)
-                self.obsv_mat_construct(idx_all_perm, k)  
+                self.obsv_mat_construct(idx_all_perm, k)
+            if (self.obsv_mat.rows < self.obsv_mat.cols):  
+                print("Insufficient obsv_mat rows. Auto-construct obsv_mat using Permutation of vector fields ...")
+                self.combn_permn_opt = "permutation"
+                self.ORC()   
+        
         else:
             print("Permutation of Vector Fields")
             for k in range(1,self.LD_order+1):
                 idx_all_perm = [*self.permn_rep(list(range(self.num_inputs+1)), k)]
                 print(idx_all_perm)
                 self.obsv_mat_construct(idx_all_perm, k)
+            while (self.obsv_mat.rows < self.obsv_mat.cols):
+                self.LD_order += 1
+                print("Insufficient obv_mat rows. Appending Lie derivative order ",self.LD_order, " to obsv_mat ...")
+                idx_all_perm = [*self.permn_rep(list(range(self.num_inputs+1)), self.LD_order)]
+                print(idx_all_perm)
+                self.obsv_mat_construct(idx_all_perm, self.LD_order)
                 
         if self.rank_calc_opt == "numeric" or self.rank_calc_opt == "numerical":
             if self.json_config_name != "":
@@ -203,8 +230,8 @@ class NOA():
             print("The system is weakly locally observable (WLO)")
         else:
             print("The system is NOT weakly locally observable (WLO)!"); 
-            print("Dimension of largest WLO subsystem (Observable): ", self.rank_obsv_mat)
-            print("Dimension of Undistinguishable Region (Unobservable / Joint Observable): ", self.sys_order-self.rank_obsv_mat)            
+            print("Dimension of largest WLO subsystem (Observable & Jointly Observable): ", self.rank_obsv_mat)
+            print("Dimension of Undistinguishable Region (Unobservable): ", self.sys_order-self.rank_obsv_mat)            
 
     # Observable, joint observable, and unobservable states
     def observable_mode(self):
