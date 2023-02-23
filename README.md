@@ -48,13 +48,12 @@ Example:
     mobile_robot.x      = sp.Matrix([D, phi_R, theta_R])
     ```
 
-1. Define the vector fields ${f}_0, {f}_1, ..., {f}_m$ of the control-affine form  
-$\mathbf{\dot x} = {f}_0(\mathbf{x}) +
-\sum_{i=1}^m{f}_i(\mathbf{x})u_i$  
+1. Define the vector fields $f_0, f_1, ..., f_m$ of the control-affine form  
+$\mathbf{\dot x} = f_0(\mathbf{x}) + \Sigma_{i=1}^m f_i(\mathbf{x})u_i$  
 from the process model function
-$\mathbf{\dot x} = {f}(\mathbf{x},\mathbf{u})$.  
-Vector fields that do not contain control inputs $u_i$ are defined in ${f}_0$.  
-Vector fields that are linear to the control inputs $u_i$ are defined in ${f}_i$.  
+$\mathbf{\dot x} = f(\mathbf{x},\mathbf{u})$.  
+Vector fields that do not contain control inputs $u_i$ are defined in $f_0$.  
+Vector fields that are linear to the control inputs $u_i$ are defined in $f_i$.  
 Example:
 
     ```python
@@ -93,13 +92,13 @@ Example:
     will calculate the:  
     - $0^{th}$ order Lie derivative:  $L^0{h} = {h}$
     - $1^{st}$ order Lie derivatives:  
-    $L^1_{{f}_0}{h} = \nabla_{\mathbf{x}} (L^0{h})\cdot{f}_0$  
-    $L^1_{{f}_1}{h} = \nabla_{\mathbf{x}} (L^0{h})\cdot{f}_1$  
-    $L^1_{{f}_2}{h} = \nabla_{\mathbf{x}} (L^0{h})\cdot{f}_2$
+    $L^1_{f_0}h = \nabla_{\mathbf{x}} (L^0 h) \cdot f_0$  
+    $L^1_{f_1}h = \nabla_{\mathbf{x}} (L^0 h) \cdot f_1$  
+    $L^1_{f_2}h = \nabla_{\mathbf{x}} (L^0 h) \cdot f_2$
     - $2^{nd}$ order Lie derivatives  
-    $L^2_{{f}_0{f}_1}{h} = \nabla_{\mathbf{x}} (L^1_{{f}_0}{h})\cdot{f}_1$  
-    $L^2_{{f}_0{f}_2}{h} = \nabla_{\mathbf{x}} (L^1_{{f}_0}{h})\cdot{f}_2$  
-    $L^2_{{f}_1{f}_2}{h} = \nabla_{\mathbf{x}} (L^1_{{f}_1}{h})\cdot{f}_2$  
+    $L^2_{f_0 f_1} h = \nabla_{\mathbf{x}} (L^1_{f_0}h)\cdot f_1$  
+    $L^2_{f_0 f_2} h = \nabla_{\mathbf{x}} (L^1_{f_0}h)\cdot f_2$  
+    $L^2_{f_1 f_2} h = \nabla_{\mathbf{x}} (L^1_{f_1}h)\cdot f_2$  
 
     <!-- You can also manually construct the observability matrix using the function `obsv_mat_construct(idx_all_perm, k)`  
     Example: -->
