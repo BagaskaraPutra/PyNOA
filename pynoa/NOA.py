@@ -188,24 +188,22 @@ class NOA():
                     # numeric_params_list.append(numeric_params_tuple)
                 print("Substituted parameters with values from ", self.json_config_name)
             else:
-                first_primes_same_order = []
+                first_primes = []
                 number_of_first_primes = self.params_config_subs.rows
                 num = 1
-                while(len(first_primes_same_order) < number_of_first_primes):
+                while(len(first_primes) < number_of_first_primes):
                     num += 1
                     if num > 1:
                         for i in range(2, num):
                             if (num % i) == 0:
                                 break
                         else:
-                            order_denom = 10**(len(str(num))-1)
-                            num_same_order = num/order_denom
-                            first_primes_same_order.append(num_same_order)
-                random.shuffle(first_primes_same_order)
+                            first_primes.append(num)
+                random.shuffle(first_primes)
                 
                 num = 0
                 for keywords_params in self.params_config_subs:
-                    self.numeric_params_dict[keywords_params] = first_primes_same_order[num]
+                    self.numeric_params_dict[keywords_params] = first_primes[num]
                     num += 1   
                 print("Substituted parameters with values from same-order prime numbers") 
 
