@@ -48,13 +48,13 @@ Example:
     mobile_robot.x      = sp.Matrix([D, phi_R, theta_R])
     ```
 
-1. Define the vector fields $\mathbf{f}_0, \mathbf{f}_1, ..., \mathbf{f}_m$ of the control-affine form  
-$\mathbf{\dot x} = \mathbf{f}_0(\mathbf{x}) +
-\sum_{i=1}^m\mathbf{f}_i(\mathbf{x})u_i$  
+1. Define the vector fields ${f}_0, {f}_1, ..., {f}_m$ of the control-affine form  
+$\mathbf{\dot x} = {f}_0(\mathbf{x}) +
+\sum_{i=1}^m{f}_i(\mathbf{x})u_i$  
 from the process model function
-$\mathbf{\dot x} = \mathbf{f}(\mathbf{x},\mathbf{u})$.  
-Vector fields that do not contain control inputs $u_i$ are defined in $\mathbf{f}_0$.  
-Vector fields that are linear to the control inputs $u_i$ are defined in $\mathbf{f}_i$.  
+$\mathbf{\dot x} = {f}(\mathbf{x},\mathbf{u})$.  
+Vector fields that do not contain control inputs $u_i$ are defined in ${f}_0$.  
+Vector fields that are linear to the control inputs $u_i$ are defined in ${f}_i$.  
 Example:
 
     ```python
@@ -81,7 +81,7 @@ Example:
     the $0^{th}$ order until the $k^{th}$ order  
         - `"permutation"` : permutation of Lie derivatives.
         - `"combination"` : combination of Lie derivatives
-        - `"drift2ndOrder` : combination of Lie derivatives only until the $2^{nd}$ order, but the $2^{nd}$ order only has combinations between the drift vector field and control input vector fields $\mathbf{f}_0\mathbf{f}_i$  
+        - `"drift2ndOrder` : combination of Lie derivatives only until the $2^{nd}$ order, but the $2^{nd}$ order only has combinations between the drift vector field and control input vector fields ${f}_0{f}_i$  
 
     Example:
 
@@ -91,15 +91,15 @@ Example:
     ```
 
     will calculate the:  
-    - $0^{th}$ order Lie derivative:  $L^0\mathbf{h} = \mathbf{h}$
+    - $0^{th}$ order Lie derivative:  $L^0{h} = {h}$
     - $1^{st}$ order Lie derivatives:  
-    $L^1_{\mathbf{f}_0}\mathbf{h} = \nabla_{\mathbf{x}} (L^0\mathbf{h})\cdot\mathbf{f}_0$  
-    $L^1_{\mathbf{f}_1}\mathbf{h} = \nabla_{\mathbf{x}} (L^0\mathbf{h})\cdot\mathbf{f}_1$  
-    $L^1_{\mathbf{f}_2}\mathbf{h} = \nabla_{\mathbf{x}} (L^0\mathbf{h})\cdot\mathbf{f}_2$
+    $L^1_{{f}_0}{h} = \nabla_{\mathbf{x}} (L^0{h})\cdot{f}_0$  
+    $L^1_{{f}_1}{h} = \nabla_{\mathbf{x}} (L^0{h})\cdot{f}_1$  
+    $L^1_{{f}_2}{h} = \nabla_{\mathbf{x}} (L^0{h})\cdot{f}_2$
     - $2^{nd}$ order Lie derivatives  
-    $L^2_{\mathbf{f}_0\mathbf{f}_1}\mathbf{h} = \nabla_{\mathbf{x}} (L^1\mathbf{h}_{\mathbf{f}_0})\cdot\mathbf{f}_1$  
-    $L^2_{\mathbf{f}_0\mathbf{f}_2}\mathbf{h} = \nabla_{\mathbf{x}} (L^1\mathbf{h}_{\mathbf{f}_0})\cdot\mathbf{f}_2$  
-    $L^2_{\mathbf{f}_1\mathbf{f}_2}\mathbf{h} = \nabla_{\mathbf{x}} (L^1\mathbf{h}_{\mathbf{f}_1})\cdot\mathbf{f}_2$  
+    $L^2_{{f}_0{f}_1}{h} = \nabla_{\mathbf{x}} (L^1_{{f}_0}{h})\cdot{f}_1$  
+    $L^2_{{f}_0{f}_2}{h} = \nabla_{\mathbf{x}} (L^1_{{f}_0}{h})\cdot{f}_2$  
+    $L^2_{{f}_1{f}_2}{h} = \nabla_{\mathbf{x}} (L^1_{{f}_1}{h})\cdot{f}_2$  
 
     <!-- You can also manually construct the observability matrix using the function `obsv_mat_construct(idx_all_perm, k)`  
     Example: -->
@@ -108,7 +108,7 @@ Example:
 Options:  
     - `"symbolic"` : Calculate the rank of the observability matrix symbolically.
     - `"numeric"` : Calculate the rank of the observability matrix numerically by substituting the states, parameters, and inputs with numerical values.  
-[**WARNING!**] The symbolic calculation may take a long time to complete, in some cases as long as a couple of hours. It is recommended to use the **numeric** option for a system with more than 3 states.
+[**WARNING!**] Ideally, you would want to use the `"symbolic"` option. Unfortunately, `sympy`'s `symbolic` calculation may take a long time to complete, in some cases as long as a couple of hours. It is recommended to use the **`numeric`** option for a system with more than 3 states.
 
 1. Define which symbolic variables to substitute with random prime numbers in `params_config_subs = sp.Matrix([])`.  
 [**WARNING!**] Make sure that all symbolic variables in the observability matrix are stated in `params_config_subs`. If there are remaining symbolic variables in the observability matrix but not stated in `params_config_subs`, it will remain symbolic and may **increase computation time**.
@@ -140,10 +140,11 @@ Options:
 
 ## Example Jupyter Notebooks
 
-1. **martinelli_2010_mobileRobot2D.ipynb**
+1. **martinelli_2010_simple_localization_mobileRobot2D.ipynb**  
+1. **martinelli_2010_odometry_calibration_mobileRobot2D.ipynb**
 
-> Agostino Martinelli. "**Continuous Symmetries and Observability Properties in Autonomous Navigation.**" [Research Report] RR-7049, INRIA. 2010.
+    > Agostino Martinelli. "**Continuous Symmetries and Observability Properties in Autonomous Navigation.**" [Research Report] RR-7049, INRIA. 2010.
 
-2. **ko_2019_quadrotor_inertialNavigation.ipynb**
+1. **ko_2019_quadrotor_inertialNavigation.ipynb**
 
-> N. Y. Ko, I. H. Choi, G. Song and W. Youn, "**Three-Dimensional Dynamic-Model-Aided Navigation of Multirotor Unmanned Aerial Vehicles,**" _in IEEE Access, vol. 7, pp. 170715-170732_, 2019, doi: 10.1109/ACCESS.2019.2955756.
+    > N. Y. Ko, I. H. Choi, G. Song and W. Youn, "**Three-Dimensional Dynamic-Model-Aided Navigation of Multirotor Unmanned Aerial Vehicles,**" _in IEEE Access, vol. 7, pp. 170715-170732_, 2019, doi: 10.1109/ACCESS.2019.2955756.
